@@ -1,0 +1,16 @@
+{
+  "name": "frank",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "11.5.1",
+    "ffmpeg-static": "^4.2.7",
+    "opusscript": "^0.0.7"
+  }
+}
