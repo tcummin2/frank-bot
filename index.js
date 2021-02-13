@@ -1,5 +1,5 @@
 const Discord = require('discord.js')
-const { token } = require('./config.json')
+const { token, botId } = require('./config.json')
 
 const client = new Discord.Client()
 let timeout
@@ -36,11 +36,18 @@ client.on('voiceStateUpdate', async (oldGuildMember, newGuildMember) => {
   }
 })
 
-client.on('message', async ({ content, channel }) => {
+client.on('message', async ({ content, channel, mentions }) => {
   if (content.toLowerCase() === 'sup frank') {
     await channel.send('sup dude')
   } else if (content.toLowerCase() === 'bye frank') {
     await channel.send('see ya')
+  } else if (mentions.members.some(member => member.id === botId)) {
+    await channel.send('', {
+      files: [{
+        attachment: 'assets/tip.jpg',
+        name: 'tip.jpg'
+      }]
+    })
   }
 })
 
