@@ -1,5 +1,6 @@
 const Discord = require('discord.js')
 const { token, botId } = require('./config.json')
+const sounds = require('./sounds')
 
 const client = new Discord.Client()
 let timeout
@@ -31,8 +32,11 @@ client.on('voiceStateUpdate', async (oldGuildMember, newGuildMember) => {
     clearTimeout(timeout)
     timeout = null
   } else {
-    await largestChannel.join()
-    if (!timeout) queueSoundPlayback()
+    let connection = await largestChannel.join()
+    if (!timeout) {
+      connection.playFile(sounds.initialSoundFile)
+      queueSoundPlayback()
+    }
   }
 })
 
@@ -53,7 +57,7 @@ client.on('message', async ({ content, channel, mentions }) => {
 
 function playSound() {
   client.voiceConnections.forEach(connection => {
-    const dispatcher = connection.playFile('assets/stop-it.mp3')
+    const dispatcher = connection.playFile(sounds.getRandomSoundFile())
     dispatcher.on('end', queueSoundPlayback)
   })
 }
