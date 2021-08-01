@@ -9,13 +9,16 @@ client.login(token)
 
 client.on('error', console.error)
 
-client.on('voiceStateUpdate', async (oldGuildMember, newGuildMember) => {
-  const { user: oldUser, voiceChannel: oldVoiceChannel } = oldGuildMember
-  const { guild, user: newUser, voiceChannel: newVoiceChannel } = newGuildMember
+client.on('voiceStateUpdate', async (oldState, newState) => {
+  const oldUser = oldState.member.user
+  const oldVoiceChannel = oldState.channel
+  const newUser = newState.member.user
+  const newVoiceChannel = newState.channel
+  const guild = newState.guild
 
   if (newUser.bot || oldUser.bot || newVoiceChannel === oldVoiceChannel) return
 
-  const voiceChannels = guild.channels.filter(channel => channel.type === 'voice')
+  const voiceChannels = guild.channels.cache.filter(channel => channel.type === 'voice')
 
   const largestChannel = voiceChannels.reduce((currentMax, channel) => {
     let members = channel.members.filter(member => !member.user.bot)
@@ -26,13 +29,17 @@ client.on('voiceStateUpdate', async (oldGuildMember, newGuildMember) => {
   }, null)
 
   const isBotOnlyOneInChannel = !!largestChannel && !largestChannel.members.filter(member => !member.user.bot).size
-  if (isBotOnlyOneInChannel && guild.voiceConnection) {
-    guild.voiceConnection.disconnect()
+  if (isBotOnlyOneInChannel && guild.voice.channel) {
+    guild.voice.channel.leave()
     clearTimeout(timeout)
     timeout = null
   } else {
-    await largestChannel.join()
-    if (!timeout) queueSoundPlayback()
+    try {
+      await largestChannel.join()
+      if (!timeout) queueSoundPlayback()
+    } catch (e) {
+      // do nothing
+    }
   }
 })
 
@@ -52,9 +59,9 @@ client.on('message', async ({ content, channel, mentions }) => {
 })
 
 function playSound() {
-  client.voiceConnections.forEach(connection => {
-    const dispatcher = connection.playFile('assets/stop-it.mp3')
-    dispatcher.on('end', queueSoundPlayback)
+  client.voice.connections.forEach(connection => {
+    const dispatcher = connection.play('assets/stop-it.mp3')
+    dispatcher.on('finish', queueSoundPlayback)
   })
 }
 
