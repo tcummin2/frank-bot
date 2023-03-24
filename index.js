@@ -24,11 +24,27 @@ const client = new Client({
 let timeout
 
 client.login(token)
+  // eslint-disable-next-line no-console
   .then(() => console.log('Started'))
 
+// eslint-disable-next-line no-console
 client.on('error', console.error)
 
 const player = createAudioPlayer()
+
+function playSound() {
+  const resource = createAudioResource(SOUND_FILE)
+  player.play(resource)
+}
+
+function getRandomNumberBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+function queueSoundPlayback() {
+  const ms = getRandomNumberBetween(30, 90) * 60 * 1000
+  timeout = setTimeout(playSound, ms)
+}
 
 player.on('stateChange', (oldState, newState) => {
   if (oldState.status === AudioPlayerStatus.Playing && newState.status === AudioPlayerStatus.Idle) {
@@ -41,14 +57,14 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   const oldVoiceChannel = oldState.channel
   const newUser = newState.member.user
   const newVoiceChannel = newState.channel
-  const guild = newState.guild
+  const { guild } = newState
 
   if (newUser.bot || oldUser.bot || newVoiceChannel === oldVoiceChannel) return
 
   const voiceChannels = guild.channels.cache.filter(channel => channel.type === ChannelType.GuildVoice)
 
   const largestChannel = voiceChannels.reduce((currentMax, channel) => {
-    let members = channel.members.filter(member => !member.user.bot)
+    const members = channel.members.filter(member => !member.user.bot)
 
     return !currentMax || members.size > currentMax.members.filter(member => !member.user.bot).size
       ? channel
@@ -92,17 +108,3 @@ client.on('messageCreate', async ({ content, channel, mentions }) => {
     })
   }
 })
-
-function playSound() {
-  const resource = createAudioResource(SOUND_FILE)
-  player.play(resource)
-}
-
-function getRandomNumberBetween(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min)
-}
-
-function queueSoundPlayback() {
-  const ms = getRandomNumberBetween(30, 90) * 60 * 1000
-  timeout = setTimeout(playSound, ms)
-}
