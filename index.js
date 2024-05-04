@@ -1,3 +1,5 @@
+
+import path from 'path'
 import { Client, GatewayIntentBits, ChannelType } from 'discord.js'
 import {
   joinVoiceChannel,
@@ -7,9 +9,19 @@ import {
   AudioPlayerStatus
 } from '@discordjs/voice'
 
-const SOUND_FILE = 'assets/stop-it.mp3'
 const MIN_MINUTES_BETWEEN_SOUND = parseInt(process.env.MIN_MINUTES_BETWEEN_SOUND, 10)
 const MAX_MINUTES_BETWEEN_SOUND = parseInt(process.env.MAX_MINUTES_BETWEEN_SOUND, 10)
+
+const SOUNDS = [
+  {
+    file: path.resolve('./assets/stop-it.mp3'),
+    probability: 0.7
+  },
+  {
+    file: path.resolve('./assets/gegagedigedagedago.mp3'),
+    probability: 0.3
+  }
+]
 
 const client = new Client({
   intents: [
@@ -27,8 +39,16 @@ let timeout
 
 const player = createAudioPlayer()
 
+function chooseSound() {
+  let rollingProbability = Math.random()
+  return SOUNDS.find(({ probability }) => {
+    rollingProbability -= probability
+    return rollingProbability < 0
+  }) ?? SOUNDS[0]
+}
+
 function playSound() {
-  const resource = createAudioResource(SOUND_FILE)
+  const resource = createAudioResource(chooseSound().file)
   player.play(resource)
 }
 
