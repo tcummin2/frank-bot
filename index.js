@@ -1,12 +1,12 @@
-const { Client, GatewayIntentBits, ChannelType } = require('discord.js')
-const {
+import { Client, GatewayIntentBits, ChannelType } from 'discord.js'
+import {
   joinVoiceChannel,
   createAudioPlayer,
   createAudioResource,
   getVoiceConnection,
   AudioPlayerStatus
-} = require('@discordjs/voice')
-const { token, botId } = require('./config.json')
+} from '@discordjs/voice'
+import config from './config.json' with { type: 'json' }
 
 const SOUND_FILE = 'assets/stop-it.mp3'
 
@@ -21,14 +21,8 @@ const client = new Client({
     GatewayIntentBits.MessageContent
   ]
 })
+
 let timeout
-
-client.login(token)
-  // eslint-disable-next-line no-console
-  .then(() => console.log('Started'))
-
-// eslint-disable-next-line no-console
-client.on('error', console.error)
 
 const player = createAudioPlayer()
 
@@ -37,12 +31,12 @@ function playSound() {
   player.play(resource)
 }
 
-function getRandomNumberBetween(min, max) {
+function getRandomIntegerBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
 function queueSoundPlayback() {
-  const ms = getRandomNumberBetween(30, 90) * 60 * 1000
+  const ms = getRandomIntegerBetween(30, 90) * 60 * 1000
   timeout = setTimeout(playSound, ms)
 }
 
@@ -84,7 +78,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
         guildId: largestChannel.guild.id,
         adapterCreator: largestChannel.guild.voiceAdapterCreator,
         selfDeaf: false,
-        setMute: false
+        selfMute: false
       })
       connection.subscribe(player)
       if (!timeout) queueSoundPlayback()
@@ -99,7 +93,7 @@ client.on('messageCreate', async ({ content, channel, mentions }) => {
     await channel.send({ content: 'sup dude' })
   } else if (content.toLowerCase() === 'bye frank') {
     await channel.send({ content: 'see ya' })
-  } else if (mentions.members.some(member => member.id === botId)) {
+  } else if (mentions.members.some(member => member.id === config.botId)) {
     await channel.send({
       files: [{
         attachment: 'assets/tip.jpg',
@@ -108,3 +102,16 @@ client.on('messageCreate', async ({ content, channel, mentions }) => {
     })
   }
 })
+
+async function loadBot() {
+  try {
+    await client.login(config.token)
+    console.log('Started')
+  } catch (error) {
+    console.error(error)
+    client.destroy()
+    process.exit(1)
+  }
+}
+
+loadBot()
