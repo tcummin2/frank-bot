@@ -1,30 +1,25 @@
 # FrankBot
 
-A simple Discord bot named Frank.
+A simple Discord bot named Frank that interjects with a sound clip every 30 to 60 minutes.
+
+## Prerequisites
+
+- Docker
+- Docker Compose
 
 ## Setup
 
-You will need to add a file named `config.json` to the root directory with the following structure, where `token` is the bot's token and `botId` is the Client ID.
+Clone the repo.
 
-```json
-{
-  "token": "...",
-  "botId": "..."
-}
+You will need to add a `.env` file containing the following parameters:
+```
+TOKEN=<YOUR_TOKEN>
+BOT_ID=<THE_BOT_ID>
+MIN_MINUTES_BETWEEN_SOUND=<CHOOSE_A_MINIMUM>
+MAX_MINUTES_BETWEEN_SOUND=<CHOOSE_A_MAXIMUM>
 ```
 
-### Add Bot to server
+Modify the sample `docker-compose.yml` as needed.
 
-
-Replace `[clientId]` in this url with your Client ID (same as above), which is found in in the Discord developer portal.
-
-https://discordapp.com/oauth2/authorize?client_id=[clientId]&scope=bot&permissions=1
-
-## Getting Started
-
-Use yarn or NPM.
-
-```bash
-yarn # or npm install
-yarn start # or npm run start
-```
+## Run Bot
+`docker compose up`

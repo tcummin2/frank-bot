@@ -1,4 +1,3 @@
 node_modules
 ffmpeg.exe
-
-config.json
+.env

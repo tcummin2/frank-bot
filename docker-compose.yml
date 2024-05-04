@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  frank:
+    image: tcummin2/frank:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3001:3001
+    restart: unless-stopped
+    env_file: .env
+    develop:
+      watch:
+        - action: rebuild
+          path: ./

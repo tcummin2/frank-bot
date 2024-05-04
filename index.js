@@ -6,9 +6,10 @@ import {
   getVoiceConnection,
   AudioPlayerStatus
 } from '@discordjs/voice'
-import config from './config.json' with { type: 'json' }
 
 const SOUND_FILE = 'assets/stop-it.mp3'
+const MIN_MINUTES_BETWEEN_SOUND = parseInt(process.env.MIN_MINUTES_BETWEEN_SOUND, 10)
+const MAX_MINUTES_BETWEEN_SOUND = parseInt(process.env.MAX_MINUTES_BETWEEN_SOUND, 10)
 
 const client = new Client({
   intents: [
@@ -36,7 +37,7 @@ function getRandomIntegerBetween(min, max) {
 }
 
 function queueSoundPlayback() {
-  const ms = getRandomIntegerBetween(30, 90) * 60 * 1000
+  const ms = getRandomIntegerBetween(MIN_MINUTES_BETWEEN_SOUND, MAX_MINUTES_BETWEEN_SOUND) * 60 * 1000
   timeout = setTimeout(playSound, ms)
 }
 
@@ -93,7 +94,7 @@ client.on('messageCreate', async ({ content, channel, mentions }) => {
     await channel.send({ content: 'sup dude' })
   } else if (content.toLowerCase() === 'bye frank') {
     await channel.send({ content: 'see ya' })
-  } else if (mentions.members.some(member => member.id === config.botId)) {
+  } else if (mentions.members.some(member => member.id === process.env.BOT_ID)) {
     await channel.send({
       files: [{
         attachment: 'assets/tip.jpg',
@@ -105,7 +106,7 @@ client.on('messageCreate', async ({ content, channel, mentions }) => {
 
 async function loadBot() {
   try {
-    await client.login(config.token)
+    await client.login(process.env.TOKEN)
     console.log('Started')
   } catch (error) {
     console.error(error)
